@@ -34,6 +34,8 @@
 
   <!-- feed -->
   
+    <link rel="alternate" href="/atom.xml" title="蒼糸" type="application/atom+xml">
+  
 
   
     
@@ -277,8 +279,8 @@
 <!-- optional -->
 
   <script>
-  function loadUtterances() {
-    const els = document.querySelectorAll("#comments #utterances");
+  function loadBeaudar() {
+    const els = document.querySelectorAll("#comments #beaudar");
     if (els.length === 0) return;
     els.forEach((el, i) => {
       try {
@@ -287,7 +289,7 @@
         console.log(error);
       }
       var script = document.createElement('script');
-      script.src = 'https://utteranc.es/client.js';
+      script.src = 'https://beaudar.lipk.org/client.js';
       script.async = true;
       for (let key of Object.keys(el.attributes)) {
         let attr = el.attributes[key];
@@ -299,7 +301,7 @@
     });
   }
   window.addEventListener('DOMContentLoaded', (event) => {
-      loadUtterances();
+      loadBeaudar();
   });
 </script>
 
