@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 6.1.0">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>Spring源码分析 - 灰色と青</title>
+
+  
+    <meta name="description" content="Spring源码分析容器和Bean容器接口BeanFactoryBaanFacroty是什么  是ApplicationContext的父接口 他才是Spring的核心容器，ApplicationContext「实现」组合了他的功能，也就是ApplicationContext组合了BeanFactory  BeanFactory的功能  表面上看只有一个getBean 实际上控制反转、基本的依赖注">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring源码分析">
+<meta property="og:url" content="http://example.com/2022/03/25/Spring%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="灰色と青">
+<meta property="og:description" content="Spring源码分析容器和Bean容器接口BeanFactoryBaanFacroty是什么  是ApplicationContext的父接口 他才是Spring的核心容器，ApplicationContext「实现」组合了他的功能，也就是ApplicationContext组合了BeanFactory  BeanFactory的功能  表面上看只有一个getBean 实际上控制反转、基本的依赖注">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203251131753.png">
+<meta property="article:published_time" content="2022-03-24T16:54:01.000Z">
+<meta property="article:modified_time" content="2022-03-25T09:19:08.357Z">
+<meta property="article:author" content="sean">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203251131753.png">
+  
+  
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="灰色と青" type="application/atom+xml">
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+
+  
+</head>
+
+<body>
+  
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/header.jpg" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">灰色と青</div><div class="sub cap">Eurekawm's Blog</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/wiki/">项目</a><a class="nav-item" href="/notes/">笔记</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E5%92%8CBean"><span class="toc-text">容器和Bean</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E6%8E%A5%E5%8F%A3"><span class="toc-text">容器接口</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#BeanFactory"><span class="toc-text">BeanFactory</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ApplicationContext%E7%9A%84%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD"><span class="toc-text">ApplicationContext的拓展功能</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E5%AE%9E%E7%8E%B0"><span class="toc-text">容器实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#BeanFactory%E5%AE%9E%E7%8E%B0%E7%9A%84%E7%89%B9%E7%82%B9"><span class="toc-text">BeanFactory实现的特点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ApplicationContext%E7%9A%84%E5%B8%B8%E8%A7%81%E5%AE%9E%E7%8E%B0%E5%92%8C%E7%89%B9%E7%82%B9"><span class="toc-text">ApplicationContext的常见实现和特点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Bean%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">Bean的生命周期</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AOP"><span class="toc-text">AOP</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-MVC"><span class="toc-text">Spring MVC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringBoot"><span class="toc-text">SpringBoot</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-text">其他</span></a></li></ol></div></div></div>
+
+
+</div>
+
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Java/">Java</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/Java/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">源码分析</a></div><div id="post-meta">发布于&nbsp;<time datetime="2022-03-24T16:54:01.000Z">2022-03-25</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>Spring源码分析</span></h1>
+<h1 id="Spring源码分析"><a href="#Spring源码分析" class="headerlink" title="Spring源码分析"></a>Spring源码分析</h1><h2 id="容器和Bean"><a href="#容器和Bean" class="headerlink" title="容器和Bean"></a>容器和Bean</h2><h3 id="容器接口"><a href="#容器接口" class="headerlink" title="容器接口"></a>容器接口</h3><h4 id="BeanFactory"><a href="#BeanFactory" class="headerlink" title="BeanFactory"></a>BeanFactory</h4><p>BaanFacroty是什么</p>
+<ol>
+<li>是ApplicationContext的父接口</li>
+<li>他才是Spring的核心容器，ApplicationContext「实现」组合了他的功能，也就是ApplicationContext组合了BeanFactory</li>
+</ol>
+<p>BeanFactory的功能</p>
+<ol>
+<li>表面上看只有一个getBean</li>
+<li>实际上控制反转、基本的依赖注入、直至 Bean 的生命周期的各种功能, 都由它的实现类提供</li>
+</ol>
+<h4 id="ApplicationContext的拓展功能"><a href="#ApplicationContext的拓展功能" class="headerlink" title="ApplicationContext的拓展功能"></a>ApplicationContext的拓展功能</h4><p>ApplicationContext是BeanFactory的实现，然后还实现了其他的几个接口，这相当于在BeanFactory的基础上拥有了其他的能力，ApplicationContext实现了这些接口之后就有了以下的能力。</p>
+<ol>
+<li>处理国际化资源能力</li>
+<li>对通配符匹配资源「类路径磁盘路径等」的能力</li>
+<li>事件发布能力</li>
+<li>环境信息读取能力</li>
+</ol>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203251131753.png" alt="image-20220325113157729"></p>
+<h3 id="容器实现"><a href="#容器实现" class="headerlink" title="容器实现"></a>容器实现</h3><h4 id="BeanFactory实现的特点"><a href="#BeanFactory实现的特点" class="headerlink" title="BeanFactory实现的特点"></a>BeanFactory实现的特点</h4><p>DefaultListableBeanFactory，BeanFacroty的核心实现，通过Bean的描述信息BeanDefination类「class，scope，初始化，销毁」来创建Bean，管理Bean的整个生命周期。</p>
+<p>可是对DefaultListableBeanFactory增加一些Bean工厂的后置处理器补充一下 Bean定义，针对Bean有一些Bean的后置，给Bean的生命周期个个阶段提供扩展，例如InternalAutowiredAnnotationProcessor 给Bean自动填充。</p>
+<p>BeanFactory不会做的事情：</p>
+<ol>
+<li>不会主动调用 BeanFactory 后处理器</li>
+<li>不会主动添加Bean后置处理器</li>
+<li>不会主动解析单例 也就是不会提前创建 只有用的时候才会创建</li>
+<li>不会解析beanFactory 还不会解析 ${} 与 #{}</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">DefaultListableBeanFactory</span> <span class="variable">beanFactory</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DefaultListableBeanFactory</span>();</span><br><span class="line">        <span class="comment">// bean 的定义（class, scope, 初始化, 销毁）</span></span><br><span class="line">        <span class="type">AbstractBeanDefinition</span> <span class="variable">beanDefinition</span> <span class="operator">=</span></span><br><span class="line">                BeanDefinitionBuilder.genericBeanDefinition(Config.class).setScope(<span class="string">&quot;singleton&quot;</span>).getBeanDefinition();</span><br><span class="line">        beanFactory.registerBeanDefinition(<span class="string">&quot;config&quot;</span>, beanDefinition);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 给 BeanFactory 添加一些常用的后处理器</span></span><br><span class="line">        AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// BeanFactory 后处理器主要功能，补充了一些 bean 定义</span></span><br><span class="line">        beanFactory.getBeansOfType(BeanFactoryPostProcessor.class).values().forEach(beanFactoryPostProcessor -&gt; &#123;</span><br><span class="line">            beanFactoryPostProcessor.postProcessBeanFactory(beanFactory);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Bean 后处理器, 针对 bean 的生命周期的各个阶段提供扩展, 例如 @Autowired @Resource ...</span></span><br><span class="line">        beanFactory.getBeansOfType(BeanPostProcessor.class).values().stream()</span><br><span class="line">                .sorted(beanFactory.getDependencyComparator())</span><br><span class="line">                .forEach(beanPostProcessor -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;&gt;&gt;&gt;&gt;&quot;</span> + beanPostProcessor);</span><br><span class="line">            beanFactory.addBeanPostProcessor(beanPostProcessor);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String name : beanFactory.getBeanDefinitionNames()) &#123;</span><br><span class="line">            System.out.println(name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        beanFactory.preInstantiateSingletons(); <span class="comment">// 准备好所有单例</span></span><br><span class="line">        System.out.println(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; &quot;</span>);</span><br><span class="line"><span class="comment">//        System.out.println(beanFactory.getBean(Bean1.class).getBean2());</span></span><br><span class="line">        System.out.println(beanFactory.getBean(Bean1.class).getInter());</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">            学到了什么:</span></span><br><span class="line"><span class="comment">            a. beanFactory 不会做的事</span></span><br><span class="line"><span class="comment">                  bu</span></span><br><span class="line"><span class="comment">                   2. 不会主动添加 Bean 后处理器</span></span><br><span class="line"><span class="comment">                   3. 不会主动初始化单例</span></span><br><span class="line"><span class="comment">                   4. 不会解析beanFactory 还不会解析 $&#123; &#125; 与 #&#123; &#125;</span></span><br><span class="line"><span class="comment">            b. bean 后处理器会有排序的逻辑</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;Common:&quot;</span> + (Ordered.LOWEST_PRECEDENCE - <span class="number">3</span>));</span><br><span class="line">        System.out.println(<span class="string">&quot;Autowired:&quot;</span> + (Ordered.LOWEST_PRECEDENCE - <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="ApplicationContext的常见实现和特点"><a href="#ApplicationContext的常见实现和特点" class="headerlink" title="ApplicationContext的常见实现和特点"></a>ApplicationContext的常见实现和特点</h4><ol>
+<li><p>ClassPathXmlApplicationContext基于 classpath 下 xml 格式的配置文件来创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testClassPathXmlApplicationContext</span><span class="params">()</span> &#123;</span><br><span class="line">       <span class="type">ClassPathXmlApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span></span><br><span class="line">               <span class="keyword">new</span> <span class="title class_">ClassPathXmlApplicationContext</span>(<span class="string">&quot;a02.xml&quot;</span>);</span><br><span class="line">   </span><br><span class="line">       <span class="keyword">for</span> (String name : context.getBeanDefinitionNames()) &#123;</span><br><span class="line">           System.out.println(name);</span><br><span class="line">       &#125;</span><br><span class="line">   </span><br><span class="line">       System.out.println(context.getBean(Bean2.class).getBean1());</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>FileSystemXmlApplicationContext 基于磁盘路径下 xml 格式的配置文件来创建 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testFileSystemXmlApplicationContext</span><span class="params">()</span> &#123;</span><br><span class="line">       <span class="type">FileSystemXmlApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span></span><br><span class="line">               <span class="keyword">new</span> <span class="title class_">FileSystemXmlApplicationContext</span>(</span><br><span class="line">                       <span class="string">&quot;src\\main\\resources\\a02.xml&quot;</span>);</span><br><span class="line">       <span class="keyword">for</span> (String name : context.getBeanDefinitionNames()) &#123;</span><br><span class="line">           System.out.println(name);</span><br><span class="line">       &#125;</span><br><span class="line">   </span><br><span class="line">       System.out.println(context.getBean(Bean2.class).getBean1());</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>AnnotationConfigApplicationContext 较为经典的容器, 基于 java 配置类来创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testAnnotationConfigApplicationContext</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">AnnotationConfigApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">AnnotationConfigApplicationContext</span>(Config.class);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String name : context.getBeanDefinitionNames()) &#123;</span><br><span class="line">            System.out.println(name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(context.getBean(Bean2.class).getBean1());</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>AnnotationConfigServletWebServerApplicationContext较为经典的容器, 基于 java 配置类来创建, 用于 web 环境</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testAnnotationConfigServletWebServerApplicationContext</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="type">AnnotationConfigServletWebServerApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span></span><br><span class="line">              <span class="keyword">new</span> <span class="title class_">AnnotationConfigServletWebServerApplicationContext</span>(WebConfig.class);</span><br><span class="line">      <span class="keyword">for</span> (String name : context.getBeanDefinitionNames()) &#123;</span><br><span class="line">          System.out.println(name);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="Bean的生命周期"><a href="#Bean的生命周期" class="headerlink" title="Bean的生命周期"></a>Bean的生命周期</h4><p>一个受 Spring 管理的 bean，生命周期主要阶段有</p>
+<ol>
+<li>创建：根据 bean 的构造方法或者工厂方法来创建 bean 实例对象</li>
+<li>依赖注入：根据 @Autowired，@Value 或其它一些手段，为 bean 的成员变量填充值、建立关系</li>
+<li>初始化：回调各种 Aware 接口，调用对象的各种初始化方法</li>
+<li>销毁：在容器关闭时，会销毁所有单例对象（即调用它们的销毁方法）<ul>
+<li>prototype 对象也能够销毁，不过需要容器这边主动调用</li>
+</ul>
+</li>
+</ol>
+<h2 id="AOP"><a href="#AOP" class="headerlink" title="AOP"></a>AOP</h2><h2 id="Spring-MVC"><a href="#Spring-MVC" class="headerlink" title="Spring MVC"></a>Spring MVC</h2><h2 id="SpringBoot"><a href="#SpringBoot" class="headerlink" title="SpringBoot"></a>SpringBoot</h2><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2022/03/24/SpringCloud-OpenFeign%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">SpringCloud OpenFeign源码分析<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2022/03/27/MySQL%E4%BC%98%E5%8C%96%E7%9B%B8%E5%85%B3/">MySQL优化相关<span class="note">较新</span></a></section></div>
+
+
+
+
+
+
+  <div class='related-wrap md reveal' id="comments">
+    <div class='cmt-title cap theme'>
+      快来参与讨论吧
+    </div>
+    <div class='cmt-body beaudar'>
+      
+
+<svg class="loading" style="vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg>
+
+<div id="beaudar" repo="eurekawm/blog-comments" issue-term="pathname" theme="preferred-color-scheme" input-position="top" comment-order="desc" loading="false" branch="main"></div>
+
+    </div>
+  </div>
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+<p>本站由 <a href="http://example.com/">@sean</a> 创建，使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a> 作为主题。</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+  <script>
+  function loadBeaudar() {
+    const els = document.querySelectorAll("#comments #beaudar");
+    if (els.length === 0) return;
+    els.forEach((el, i) => {
+      try {
+        el.innerHTML = '';
+      } catch (error) {
+        console.log(error);
+      }
+      var script = document.createElement('script');
+      script.src = 'https://beaudar.lipk.org/client.js';
+      script.async = true;
+      for (let key of Object.keys(el.attributes)) {
+        let attr = el.attributes[key];
+        if (['class', 'id'].includes(attr.name) === false) {
+          script.setAttribute(attr.name, attr.value);
+        }
+      }
+      el.appendChild(script);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', (event) => {
+      loadBeaudar();
+  });
+</script>
+
+
+
+
+<!-- inject -->
+
+
+  </div>
+</body>
+</html>
