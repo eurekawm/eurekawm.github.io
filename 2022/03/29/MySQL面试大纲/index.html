@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 6.1.0">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>MySQL面试大纲 - 灰色と青</title>
+
+  
+    <meta name="description" content="MySQL面试大纲MySQL 数据库使用的索引数据结构是什么?B+树。 B+树是为磁盘或其他直接存取辅助设备设计的一种平衡查找树。在B+树中，所有记录节点都是按键值的大小顺序存放在同一层的叶子节点上，由各叶子节点指针进行连接。 B+索引在数据库中有一个特点是高扇出性，因此在数据库中，B+树的高度一般都在24层，这也就是说查 找某一键值的行记录时最多只需要2到4次IO，这倒不错。因为当前一般的机械磁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL面试大纲">
+<meta property="og:url" content="http://example.com/2022/03/29/MySQL%E9%9D%A2%E8%AF%95%E5%A4%A7%E7%BA%B2/index.html">
+<meta property="og:site_name" content="灰色と青">
+<meta property="og:description" content="MySQL面试大纲MySQL 数据库使用的索引数据结构是什么?B+树。 B+树是为磁盘或其他直接存取辅助设备设计的一种平衡查找树。在B+树中，所有记录节点都是按键值的大小顺序存放在同一层的叶子节点上，由各叶子节点指针进行连接。 B+索引在数据库中有一个特点是高扇出性，因此在数据库中，B+树的高度一般都在24层，这也就是说查 找某一键值的行记录时最多只需要2到4次IO，这倒不错。因为当前一般的机械磁">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203291958337.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203292014778.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203292059454.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203292310061.png">
+<meta property="article:published_time" content="2022-03-29T11:48:59.000Z">
+<meta property="article:modified_time" content="2022-03-29T15:16:57.401Z">
+<meta property="article:author" content="sean">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203291958337.png">
+  
+  
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="灰色と青" type="application/atom+xml">
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+
+  
+</head>
+
+<body>
+  
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/header.jpg" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">灰色と青</div><div class="sub cap">Eurekawm's Blog</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/wiki/">项目</a><a class="nav-item" href="/notes/">笔记</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8%E7%9A%84%E7%B4%A2%E5%BC%95%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">MySQL 数据库使用的索引数据结构是什么?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%87%E8%AE%BE%E6%AF%8F%E6%9D%A1sql%E4%BF%A1%E6%81%AF%E4%B8%BA1kb%EF%BC%8C%E4%B8%BB%E9%94%AEID%E4%B8%BAbigint%E5%9E%8B%EF%BC%8C%E4%B8%80%E9%A2%97%E9%AB%98%E5%BA%A6%E4%B8%BA4%E7%9A%84b-%E6%A0%91%E8%83%BD%E5%AD%98-%E5%82%A8%E5%A4%9A%E5%B0%91%E6%95%B0%E6%8D%AE"><span class="toc-text">假设每条sql信息为1kb，主键ID为bigint型，一颗高度为4的b+树能存 储多少数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E7%94%A8B-%E6%A0%91%E5%81%9A%E7%B4%A2%E5%BC%95%E8%80%8C%E4%B8%8D%E9%80%89%E7%94%A8%E4%BA%8C%E5%8F%89%E6%A0%91%E6%88%96%E8%80%85B%E6%A0%91"><span class="toc-text">为什么选用B+树做索引而不选用二叉树或者B树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8Hash%E8%A1%A8%E5%81%9A%E7%B4%A2%E5%BC%95"><span class="toc-text">为什么不用Hash表做索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B7%A6%E5%89%8D%E7%BC%80%E5%8E%9F%E5%88%99-%E5%9F%BA%E4%BA%8E-MySQL-%E7%9A%84-InnoDB-%E5%BC%95%E6%93%8E"><span class="toc-text">什么是最左前缀原则?(基于 MySQL 的 InnoDB 引擎)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95"><span class="toc-text">什么是聚集索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%BE%85%E5%8A%A9%E7%B4%A2%E5%BC%95"><span class="toc-text">什么是辅助索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%B4%E8%AF%B4FIC-Fast-Index-Creation-%E5%8E%9F%E7%90%86%EF%BC%8C%E4%B8%8E%E6%99%AE%E9%80%9AIndex%E6%93%8D%E4%BD%9C%E6%9C%89%E4%BB%80%E4%B9%88%E4%B8%8D%E5%90%8C"><span class="toc-text">说说FIC(Fast Index Creation)原理，与普通Index操作有什么不同</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E8%A1%A8%E7%9A%84%E5%88%97%E4%BD%9C%E4%B8%BA%E7%B4%A2%E5%BC%95%E6%9B%B4%E5%8A%A0%E9%AB%98%E6%95%88"><span class="toc-text">如何选择表的列作为索引更加高效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95%EF%BC%8C%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C%E6%9C%89%E5%90%97"><span class="toc-text">什么是联合索引，联合索引的使用经验有吗?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95%EF%BC%8C%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E4%B8%8B%E4%BC%98%E5%8C%96%E5%99%A8%E4%BC%9A%E9%80%89%E6%8B%A9%E4%BD%BF%E7%94%A8%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="toc-text">什么是覆盖索引，什么情况下优化器会选择使用覆盖索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%A6%BB%E6%95%A3%E8%AF%BB"><span class="toc-text">什么是离散读?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E5%99%A8%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96%E7%A6%BB%E6%95%A3%E8%AF%BB-%E4%BD%A0%E6%98%AF%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E7%A6%BB%E6%95%A3%E8%AF%BB%E7%9A%84"><span class="toc-text">优化器如何优化离散读?你是如何避免离散读的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-ICP-%E4%BC%98%E5%8C%96"><span class="toc-text">什么是 ICP 优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#InnoDB%E4%B8%AD%E7%9A%84%E9%94%81%E6%98%AF%E4%BB%80%E4%B9%88%E7%BA%A7%E5%88%AB%E7%9A%84%EF%BC%8C%E6%9C%89%E5%87%A0%E7%A7%8D"><span class="toc-text">InnoDB中的锁是什么级别的，有几种</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#InnoDB-%E8%A1%8C%E9%94%81%E7%9A%84-3-%E7%A7%8D%E7%AE%97%E6%B3%95"><span class="toc-text">InnoDB 行锁的 3 种算法</span></a></li></ol></div></div></div>
+
+
+</div>
+
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/DB/">DB</a></div><div id="post-meta">发布于&nbsp;<time datetime="2022-03-29T11:48:59.000Z">2022-03-29</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>MySQL面试大纲</span></h1>
+<h1 id="MySQL面试大纲"><a href="#MySQL面试大纲" class="headerlink" title="MySQL面试大纲"></a>MySQL面试大纲</h1><h3 id="MySQL-数据库使用的索引数据结构是什么"><a href="#MySQL-数据库使用的索引数据结构是什么" class="headerlink" title="MySQL 数据库使用的索引数据结构是什么?"></a>MySQL 数据库使用的索引数据结构是什么?</h3><p>B+树。</p>
+<p>B+树是为磁盘或其他直接存取辅助设备设计的一种<strong>平衡查找树</strong>。在B+树中，所有记录节点都是按键值的大小顺序存放在同一层的叶子节点上，由各叶子节点指针进行连接。</p>
+<p>B+索引在数据库中有一个特点是<strong>高扇出性</strong>，因此在数据库中，B+树的高度一般都在2<del>4层，这也就是说查 找某一键值的行记录时最多只需要2到4次IO，这倒不错。因为当前一般的机械磁盘每秒至少可以做100次IO， 2</del>4次的IO意味着查询时间只需0.02~0.04秒。</p>
+<p>数据库中的B+树索引可以分为聚集索引(clustered inex)和辅助索引(secondary index)。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203291958337.png" alt="image-20220329195833302"></p>
+<h3 id="假设每条sql信息为1kb，主键ID为bigint型，一颗高度为4的b-树能存-储多少数据"><a href="#假设每条sql信息为1kb，主键ID为bigint型，一颗高度为4的b-树能存-储多少数据" class="headerlink" title="假设每条sql信息为1kb，主键ID为bigint型，一颗高度为4的b+树能存 储多少数据"></a>假设每条sql信息为1kb，主键ID为bigint型，一颗高度为4的b+树能存 储多少数据</h3><p>在 innodb 存储引擎里面，最小的存储单元是页(page)， 一个页的大小是 16KB。如果我们在数据库的命令行输入如下 命令，那么可以返回如右图所示。</p>
+<p>这就说明了一个页的大小为 16384B, 也就是 16kb。</p>
+<p>假设一行数据的大小是 1k，那么一个页可以存放 16 行这样的数据。那如果想查找某个页里面的一个数据的 话，得首先找到他所在的页。innodb 存储引擎我们都知道使用 B + 树的结构来组织数据。如果是在主键上建 立的索引就是聚簇索引，即<strong>只有在叶子节点才存储行数据</strong>，<strong>而非叶子节点里面的内容其实是键值和指向数据 页的指针。</strong></p>
+<p>因此，我们首先解决一个简单一点的问题:那么如果是 2 层的 B + 树，最多可以存储多少行数据?</p>
+<p>如果是 2 层的 B + 树，即存在一个根节点和若干个叶子节点，那么这棵 B + 树的存放总记录数为:根节点指 针数 * 单个叶子节点记录行数。因为单个页的大小为 16kb，而一行数据的大小为 1kb，也就是说一页可以存 放 16 行数据。然后因为非叶子节点的结构是:“页指针 + 键值”，我们假设主键 ID 为 bigint 类型，长度为 8 字节(byte)，而指针大小在 InnoDB 源码中设置为 6 字节(byte)，这样一共 14 字节(byte)，因为一个 页可以存放 16k 个 byte，所以一个页可以存放的指针个数为 16384&#x2F;14&#x3D;1170 个。因此一个两层的 B + 树可 以存放的数据行的个数为:1170*16&#x3D;18720(行)</p>
+<p>那么对于高度为3的B+树呢?也就是说第一层的页，即根页可以存放 1170 个指针，然后第二层的每个页也可以 存放 1170 个指针。这样一共可以存放 1170<em>1170 个指针，所以一共可以存放 1170</em>1170*16&#x3D;21902400(2千万 左右) 行记录。也就是说一个三层的 B + 树就可以存放千万级别的数据了。而每经过一个节点都需要 IO 一次， 把这个页数据从磁盘读取到缓存，也就是说读取一个数据只需要三次 IO。</p>
+<p>继续来说，高度为4的B+树呢? 1170<em>1170</em>1170<em>16 约等于 2000万</em>1000。 5个 2000 万是 1个亿。1000个 2000 万就是 200亿。</p>
+<h3 id="为什么选用B-树做索引而不选用二叉树或者B树"><a href="#为什么选用B-树做索引而不选用二叉树或者B树" class="headerlink" title="为什么选用B+树做索引而不选用二叉树或者B树"></a><strong>为什么选用B+树做索引而不选用二叉树或者B树</strong></h3><p>b 树(balance tree)和 b + 树应用在数据库索引，可以认为是 m 叉的多路平衡查找树，但是从理论上讲，二叉 树查找速度和比较次数都是最小的，为什么不用二叉树呢?<br> 因为我们要考虑磁盘 IO 的影响，它相对于内存来说是很慢的。数据库索引是存储在磁盘上的，当数据量大时， 就不能把整个索引全部加载到内存了，只能逐一加载每一个磁盘页(对应索引树的节点)。所以我们要减少 IO 次数，对于树来说，IO 次数就是树的高度，而 “矮胖” 就是 b 树的特征之一，它的每个节点最多包含 m 个孩子， m 称为 b 树的阶。</p>
+<p>为什么不用B树呢?<br> b + 树，是 b 树的一种变体，查询性能更好。 b + 树相比于 b 树的查询优势:</p>
+<ol>
+<li>b + 树的中间节点不保存数据，所以磁盘页能容纳更多节点元素，更 “矮胖”。B 树不管叶子节点还是非叶子节 点，都会保存数据，这样导致在非叶子节点中能保存的指针数量变少(有些资料也称为扇出)，指针少的情况 下要保存大量数据，只能增加树的高度，导致 IO 操作变多，查询性能变低</li>
+<li>b + 树查询必须查找到叶子节点，b 树只要匹配到即可直接返回。因此 b + 树查找更稳定(并不慢)，必须查 找到叶子节点;而B树，如果数据在根节点，最快，在叶子节点最慢，查询效率不稳定。</li>
+<li>对于范围查找来说，b + 树只需遍历叶子节点链表即可，并且不需要排序操作，因为叶子节点已经对索引进行 了排序操作。b 树却需要重复地中序遍历，找到所有的范围内的节点。</li>
+</ol>
+<h3 id="为什么不用Hash表做索引"><a href="#为什么不用Hash表做索引" class="headerlink" title="为什么不用Hash表做索引"></a>为什么不用Hash表做索引</h3><pre><code>1. 模糊查询 不支持 因为是把字段映射成为hash码 做的定值查询
+1. 范围查询 不支持 同上只能扫描
+1. hash冲突问题 字段映射成hash码如果多个字段hash码一样，那么就会挂成链，这样对查询时间不利
+</code></pre>
+<h3 id="什么是最左前缀原则-基于-MySQL-的-InnoDB-引擎"><a href="#什么是最左前缀原则-基于-MySQL-的-InnoDB-引擎" class="headerlink" title="什么是最左前缀原则?(基于 MySQL 的 InnoDB 引擎)"></a><strong>什么是最左前缀原则?(基于 MySQL 的 InnoDB 引擎)</strong></h3><p>如果我们按照 name 字 段来建立索引的话，采 用 B + 树的结构，大概 的索引结构如下图</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203292014778.png" alt="image-20220329201458741"></p>
+<p>如果我们要进行<strong>模糊查找</strong>，查找 name 以 “张 “ 开头的所有人的 ID，即 sql 语句为 select ID from table where name like ‘张%’</p>
+<p>由于在 B + 树结构的索引中，索引项是按照索引定义里面出现的字段顺序排序的，索引在查找的时候， 可以快速定位到 ID 为 100 的张一，然后直接向右遍历所有张开头的人，直到条件不满足为止。 也就是说，我们找到第一个满足条件的人之后，直接向右遍历就可以了，由于索引是有序的，所有满足 条件的人都会聚集在一起。</p>
+<p>而这种定位到最左边，然后向右遍历寻找，就是我们所说的最左前缀原则。</p>
+<h3 id="什么是聚集索引"><a href="#什么是聚集索引" class="headerlink" title="什么是聚集索引"></a><strong>什么是聚集索引</strong></h3><p>InnoDB存储引擎表是索引组织表，即表中数据按照主键顺序存放。而<strong>聚集索引</strong>(clustered index)就是<strong>按照</strong>每 张<strong>表的主键</strong>构造一棵<strong>B+树</strong>，同时叶子节点中存放的即为整张表的行记录数据，也将聚集索引的叶子节点称为 数据页。每个数据页都通过一个双向链表来进行链接。</p>
+<p>由于实际的数据页只能按照一棵B+树进行排序，因此<strong>每张表</strong>只能拥有<strong>一个聚集索引</strong>。在多数情况下，查询优 化器倾向于采用聚集索引。因为聚集索引能够在B+树索引的叶子节点上直接找到数据。此外，由于定义了数 据的逻辑顺序，它对于<strong>主键</strong>的排序查找和范围查找速度非常快。。叶子节点的数据就是用户所要查询的数据</p>
+<p>如:用户需要查询一张注册用户的表，查询最后注册的10位用户，由于B+树索引是双向链表的，用户可以快速 找到最后一个数据页，并取出10条记录</p>
+<p><strong>SELECT * FROM Profile</strong> <strong>ORDER BY</strong> <strong>id LIMIT 10;</strong></p>
+<p>*<em>虽然使用ORDER BY对</em>***主键id记录进行排序，但是在实际过程中并没有进行所谓的filesort操作，而这就是因为 聚集索引的特点。另一个是范围查询(range query)，即如果要查找主键某一范围内的数据，通过叶子节点 的上层中间节点就可以得到页的范围，之后直接读取数据页即可。如:SELECT * FROM Profile where id &gt; 1 and id &lt;100;</p>
+<h3 id="什么是辅助索引"><a href="#什么是辅助索引" class="headerlink" title="什么是辅助索引"></a>什么是辅助索引</h3><p>对于辅助索引(Secondary Index，也称非聚集索引)，<strong>叶子节点</strong>并<strong>不包含行记录的全部数据</strong>。叶子节点 除了<strong>包含键值</strong>以外，每个叶子节点中的索引行中还包含了<strong>一个书签(bookmark)<strong>。该</strong>书签用来</strong>告诉 InnoDB存储引擎哪里可以<strong>找到与索引相对应的行数据</strong>。由于InnoDB存储引擎表是索引组织表，因此 InnoDB存储引擎的辅助索引的<strong>书签就是相应</strong>行数据<strong>的聚集索引键</strong>。</p>
+<p>辅助索引的存在并不影响数据在聚集索引中的组织，因此<strong>每张表上可以有多个辅助索引</strong>。当通过辅助索 引来寻找数据时，InnoDB存储引擎会遍历<strong>辅助索引并通过叶级别的指针获得指向主键索引的主键</strong>，然后 再通过主键索引来找到一个完整的行记录。举例来说，如果在一棵高度为3的辅助索引树中查找数据，那 需要对这棵辅助索引树遍历3次找到指定主键，如果聚集索引树的高度同样为3，那么还需要对聚集索引 树进行3次查找，最终找到一个完整的行数据所在的页，因此一共需要6次逻辑IO访问以得到最终的一个数据页。</p>
+<h3 id="说说FIC-Fast-Index-Creation-原理，与普通Index操作有什么不同"><a href="#说说FIC-Fast-Index-Creation-原理，与普通Index操作有什么不同" class="headerlink" title="说说FIC(Fast Index Creation)原理，与普通Index操作有什么不同"></a><strong>说说FIC(Fast Index Creation)原理，与普通Index操作有什么不同</strong></h3><p>MySQL 5.5版本之前(不包括5.5)存在的一个普遍被人诟病的问题是:MySQL数据库对于索引的添加或者删除的这类 DDL操作，MySQL数据库的操作过程为:<br> ❑首先<strong>创建</strong>一张新的<strong>临时表</strong>，表结构为通过命令ALTER TABLE新定义的结构。<br> ❑然后把原表中数据<strong>导入到临时表</strong>。</p>
+<p>❑接着<strong>删除原表</strong>。 ❑最后把临时表<strong>重命名</strong>为原来的表名。</p>
+<p>可以发现，若用户对于一张大表进行索引的添加和删除操作，那么这会需要很长的时间。更关键的是，若有大量事务 需要访问正在被修改的表，这意味着数据库服务不可用。MySQL数据库的索引维护始终让使用者感觉非常痛苦。</p>
+<p>InnoDB存储引擎从InnoDB 1.0.x版本开始支持一种称为Fast Index Creation(快速索引创建)的索引创建方式——简称 FIC。 对于辅助索引的创建，InnoDB存储引擎会对创建索引的表加上一个<strong>S锁</strong>。在创建的过程中，不需要重建表，因此速度 较之前提高很多，并且数据库的可用性也得到了提高。删除辅助索引操作就更简单了，InnoDB存储引擎只需更新内部 视图，并将辅助索引的空间标记为可用(不影响附注索引的使用，因为可读，后边的同时删除四个字非常传神)，<strong>同 时删除</strong>MySQL数据库内部视图上对该表的索引定义即可。</p>
+<p>由于FIC在索引的创建的过程中对表加上了S锁，因此在创建的过程中只能对该表进行读操作，若有大量的事务需要对 目标表进行写操作，那么数据库的服务同样不可用。此外，FIC方式只限定于辅助索引，对于主键的创建和删除同样需要重建一张表。</p>
+<h3 id="如何选择表的列作为索引更加高效"><a href="#如何选择表的列作为索引更加高效" class="headerlink" title="如何选择表的列作为索引更加高效"></a><strong>如何选择表的列作为索引更加高效</strong></h3><p>并不是在所有的查询条件中出现的列都需要添加索引。对于什么时候添加B+树索引，<strong>一般的经验</strong>是，在访问表中 很少一部分时使用B+树索引才有意义。对于性别字段、地区字段、类型字段，它们可取值的范围很小，称为低选 择性不建议添加索引，当然也要根据自身项目和场景的需求。如:</p>
+<p><strong>SELECT*FROM student WHERE sex&#x3D;’M’</strong></p>
+<p>按性别进行查询时，可取值的范围一般只有’M’、’F’。因此上述SQL语句得到的结果可能是该表50%的数据(假设男 女比例1∶1)，这时添加B+树索引是完全没有必要的。相反，如果某个字段的取值范围很广，几乎没有重复，即 属于高选择性，则此时使用B+树索引是最适合的。</p>
+<p><strong>怎样查看索引是否是高选择性的呢</strong>?可以通过<strong>SHOW INDEX</strong>结果中的列<strong>Cardinality</strong>来观察。<strong>Cardinality值非常关 键</strong>，<strong>表示索引中不重复记录数量的预估值</strong>。同时需要注意的是，Cardinality是一个预估值，而不是一个准确值，基 本上用户也不可能得到一个准确的值。在实际应用中，<strong>Cardinality&#x2F;n_rows_in_table应尽可能地接近1</strong>。如果非常 小，那么用户需要考虑是否还有必要创建这个索引。</p>
+<h3 id="什么是联合索引，联合索引的使用经验有吗"><a href="#什么是联合索引，联合索引的使用经验有吗" class="headerlink" title="什么是联合索引，联合索引的使用经验有吗?"></a><strong>什么是联合索引，联合索引的使用经验有吗?</strong></h3><p>联合索引就是对表上多个列进行索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> buy_log(</span><br><span class="line"> userid <span class="type">INT</span> UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span>, </span><br><span class="line"> buy_date <span class="type">DATE</span> )ENGINE<span class="operator">=</span>InnoDB;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> KEY(userid);</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> KEY(userid,buy_date)</span><br></pre></td></tr></table></figure>
+
+<p>以上代码建立了两个索引来进行比较。两个索引都包含了userid字段。</p>
+<p>情况1: 如果只对于userid进行查询，如: <strong>SELECT*FROM buy_log WHERE userid&#x3D;2;</strong> 索引选择:优化器最终的选择是索引userid，因为该索引的叶子节点包含单个键值，所以理论上一个页能 存放的记录应该更多。</p>
+<p>情况2:<strong>SELECT*FROM buy_log WHERE userid&#x3D;1 ORDER BY buy_date DESC LIMIT 3;</strong> 索引选择:优化器使用了(userid，buy_date)的联合索引userid_2，因为在这个联合索引中buy_date已经 排序好了。根据该联合索引取出数据，无须再对buy_date做一次额外的排序操作。</p>
+<p><strong>情况 3</strong>:假如三个字段的联合索引。如:对于联合索引(a，b，c)来说，下列语句同样可以直 接通过联合索引得到结果，不需要filesort的排序操作:</p>
+<p>SELECT…FROM TABLE WHERE a&#x3D;xxx ORDER BY b<br>SELECT…FROM TABLE WHERE a&#x3D;xxx AND b&#x3D;xxx ORDER BY c</p>
+<p>但是对于下面的语句，联合索引不能直接得到结果，其还需要执行一次filesort排序操作，因为索 引(a，c)并未排序:<br>SELECT…FROM TABLE WHERE a&#x3D;xxx ORDER BY c</p>
+<h3 id="什么是覆盖索引，什么情况下优化器会选择使用覆盖索引"><a href="#什么是覆盖索引，什么情况下优化器会选择使用覆盖索引" class="headerlink" title="什么是覆盖索引，什么情况下优化器会选择使用覆盖索引"></a><strong>什么是覆盖索引，什么情况下优化器会选择使用覆盖索引</strong></h3><p>InnoDB存储引擎支持覆盖索引(covering index，或称索引覆盖)，即从辅助索引中就可以得到查询的记录(<strong>此 时不能够使用select * 操作，只能对特定的索引字段进行select</strong>)，而不需要查询聚集索引中的记录。使用覆盖 索引的一个好处是辅助索引不包含整行记录的所有信息，故其大小要远小于聚集索引，因此可以<strong>减少大量的IO</strong> 操作。</p>
+<p>对于InnoDB存储引擎的辅助索引而言，由于其包含了主键信息，因此其叶子节点存放的数据为(primary key1， primary key2，…，key1，key2，…)。例如，下列语句都可仅使用一次辅助联合索引来完成查询:<br> <strong>SELECT key2</strong> FROM table WHERE key1&#x3D;xxx;<br> <strong>SELECT primary key2,key2</strong> FROM table WHERE key1&#x3D;xxx;</p>
+<p><strong>SELECT primary key1,key2</strong> FROM table WHERE key1&#x3D;xxx;<br> <strong>SELECT primary key1,primary key2，key2</strong> FROM table WHERE key1&#x3D;xxx;</p>
+<p>覆盖索引的另一个好处是<strong>对某些统计问题而言</strong>的。 还是对于上题创建的表buy_log，要进行举例说明。</p>
+<p><strong>SELECT COUNT(*)FROM buy_log;</strong></p>
+<p><strong>InnoDB存储引擎并不会选择通过查询聚集索引来进行 统计。由于buy_log表上还有辅助索引，而辅助索引远 小于聚集索引，选择辅助索引可以减少IO操作。</strong></p>
+<p>InnoDB存储引擎支持覆盖索引(covering index，或称索引覆盖)，即从辅助索引中就可以得到查询的记录(<strong>此 时不能够使用select * 操作，只能对特定的索引字段进行select</strong>)，而不需要查询聚集索引中的记录。使用覆盖 索引的一个好处是辅助索引不包含整行记录的所有信息，故其大小要远小于聚集索引，因此可以<strong>减少大量的IO</strong> 操作。</p>
+<p>对于InnoDB存储引擎的辅助索引而言，由于其包含了主键信息，因此其叶子节点存放的数据为(primary key1， primary key2，…，key1，key2，…)。例如，下列语句都可仅使用一次辅助联合索引来完成查询:<br> <strong>SELECT key2</strong> FROM table WHERE key1&#x3D;xxx;<br> <strong>SELECT primary key2,key2</strong> FROM table WHERE key1&#x3D;xxx;</p>
+<p><strong>SELECT primary key1,key2</strong> FROM table WHERE key1&#x3D;xxx;<br> <strong>SELECT primary key1,primary key2，key2</strong> FROM table WHERE key1&#x3D;xxx;</p>
+<p>覆盖索引的另一个好处是<strong>对某些统计问题而言</strong>的。 还是对于上题创建的表buy_log，要进行举例说明。</p>
+<p><strong>SELECT COUNT(*)FROM buy_log;</strong></p>
+<p><strong>InnoDB存储引擎并不会选择通过查询聚集索引来进行 统计。由于buy_log表上还有辅助索引，而辅助索引远 小于聚集索引，选择辅助索引可以减少IO操作。</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> buy_log(</span><br><span class="line"> userid <span class="type">INT</span> UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span>, </span><br><span class="line"> buy_date <span class="type">DATE</span> )ENGINE<span class="operator">=</span>InnoDB;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> KEY(userid);</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> KEY(userid,buy_date)</span><br></pre></td></tr></table></figure>
+
+<p>在通常情况下，诸如(a，b)的联合索引，一般是不可以选择列b中所谓的查询条件。但是如果是统计操作， 并且是覆盖索引的，则优化器会进行选择，如下述语句:</p>
+<p><strong>SELECT COUNT(*)FROM buy_log WHERE</strong> <strong>buy_date</strong><strong>&gt;&#x3D;’2011-01-01’AND buy_date&lt;’2011-02-01’</strong> <strong>表buy_log有(userid，buy_date)的联合索引，这里只根据列b进行条件查询，一般情况下是不能进行该联</strong></p>
+<p><strong>合索引的，但是这句SQL查询是统计操作，并且可以利用到覆盖索引的信息，因此优化器会选择该联合索引:</strong></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203292059454.png" alt="image-20220329205926417"></p>
+<p>从图5-27中可以发现列possible_keys依然为NULL，但是列key为userid_2，即表示(userid，buy_date)的 联合索引。在列Extra同样可以发现Using index提示，表示为覆盖索引。</p>
+<h3 id="什么是离散读"><a href="#什么是离散读" class="headerlink" title="什么是离散读?"></a><strong>什么是离散读?</strong></h3><p>在某些情况下，当执行EXPLAIN命令进行SQL语句的分析时，会发现优化器并没有选择索引去查找数据，而是通 过扫描聚集索引，也就是直接进行全表的扫描来得到数据。这种情况多发生于范围查找、JOIN链接操作等情况 下。</p>
+<p>假设表:t_index 。其中 id 为主键;c1 与 c2 组成了联合索引(c1，c2);此外，c1 还是一个单独索引。 进行如下查询操作:</p>
+<p><strong>SELECT</strong> ***** <strong>FROM t_index WHERE</strong> c1&gt;1 and** c1**&lt;100000;**</p>
+<p>可以看到表t_index有(c1，c2)的联合主键，此外还有对于列c1的单个索引。上述这句SQL显然是可以通过 扫描OrderID上的索引进行数据的查找。<strong>然而通过EXPLAIN命令，用户会发现优化器并没有按照OrderID上 的索引来查找数据。</strong></p>
+<p><strong>在最后的索引使用中，优化器选择了PRIMARY</strong> id <strong>聚集索引，也就是表扫描(table scan)，而非c1辅助索 引扫描(index scan)。</strong></p>
+<p>这是为什么呢?因为如果强制使用c1索引，就会造成离散读。具体原因在于用户要选取的数据是整行信息， 而c1作为辅助索引不能覆盖到我们要查询的信息，因此在对c1索引查询到指定数据后，还需要一次书签访问 来查找整行数据的信息。虽然c1索引中数据是顺序存放的，但是*<em>再一次进行书签查找的数据则是无序的，因 此变为了磁盘上的</em>***离散读操作。如果要求访问的数据量很小，则优化器还是会选择辅助索引，但是当访问 的数据占整个表中数据的蛮大一部分时(一般是20%左右)，优化器会选择通过聚集索引来查找数据。</p>
+<h3 id="优化器如何优化离散读-你是如何避免离散读的"><a href="#优化器如何优化离散读-你是如何避免离散读的" class="headerlink" title="优化器如何优化离散读?你是如何避免离散读的"></a>优化器如何优化离散读?你是如何避免离散读的</h3><p>对于InnoDB和MyISAM存储引擎的范围查询和JOIN查询操作，MRR的工作方式如下: </p>
+<ol>
+<li>将查询得到的辅助索引键值存放于一个缓存中，这时缓存中的数据是根据辅助索引键值排序的。 </li>
+<li>将缓存中的键值根据RowID进行排序。</li>
+<li>根据RowID的排序顺序来访问实际的数据文件。</li>
+</ol>
+<p>MRR优化有以下几个好处:</p>
+<ol>
+<li>MRR使数据访问变得较为顺序。在查询辅助索引时，首先根据得到的查询结果，按照主键进行排序，并按 照主键排序的顺序进行书签查找。 </li>
+<li>减少缓冲池中页被替换的次数。(顺序查找可以对一个页进行顺序查找，无需离散加载数据页) </li>
+<li>批量处理对键值的查询操作。</li>
+</ol>
+<h3 id="什么是-ICP-优化"><a href="#什么是-ICP-优化" class="headerlink" title="什么是 ICP 优化"></a><strong>什么是 ICP 优化</strong></h3><p>和Multi-Range Read一样，Index Condition Pushdown同样是MySQL 5.6开始支持的一种根据索引进行查询的 优化方式。之前的MySQL数据库版本不支持Index Condition Pushdown，当进行索引查询时，首先根据索引 来查找记录，然后再根据WHERE条件来过滤记录。在支持Index Condition Pushdown后，MySQL数据库会在 取出索引的同时，判断是否可以进行WHERE条件的过滤，也就是将<strong>WHERE的部分过滤操作放在了存储引擎层</strong>。在某些查询下，可以大大<strong>减少上层SQL层对记录的索取(fetch)，从而提高数据库的整体性能</strong>。</p>
+<h3 id="InnoDB中的锁是什么级别的，有几种"><a href="#InnoDB中的锁是什么级别的，有几种" class="headerlink" title="InnoDB中的锁是什么级别的，有几种"></a>InnoDB中的锁是什么级别的，有几种</h3><p>InnoDB存储引擎实现了如下<strong>两种标准的行级锁</strong></p>
+<ol>
+<li>**共享锁(S Lock)**，允许事务读一行数据</li>
+<li>**排他锁(X Lock)**，允许事务删除或更新一行数据</li>
+</ol>
+<p>如果一个事务T1已经获得了行r的共享锁，那么另外的事务T2可以立即获得行r的共享锁，因为读取并 没有改变行r的数据，称这种情况为锁兼容(Lock Compatible)。但若有其他的事务T3想获得行r的排 他锁，则其必须等待事务T1、T2释放行r上的共享锁——这种情况称为锁不兼容。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/eurekawm/picgo/main/img/202203292310061.png" alt="image-20220329231029025"></p>
+<h3 id="InnoDB-行锁的-3-种算法"><a href="#InnoDB-行锁的-3-种算法" class="headerlink" title="InnoDB 行锁的 3 种算法"></a><strong>InnoDB 行锁的 3 种算法</strong></h3>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2022/03/28/JVM%E9%9D%A2%E8%AF%95%E5%A4%A7%E7%BA%B2/">JVM面试大纲<span class="note">较早</span></a><div class="line"></div></section></div>
+
+
+
+
+
+
+  <div class='related-wrap md reveal' id="comments">
+    <div class='cmt-title cap theme'>
+      快来参与讨论吧
+    </div>
+    <div class='cmt-body beaudar'>
+      
+
+<svg class="loading" style="vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg>
+
+<div id="beaudar" repo="eurekawm/blog-comments" issue-term="pathname" theme="preferred-color-scheme" input-position="top" comment-order="desc" loading="false" branch="main"></div>
+
+    </div>
+  </div>
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+<p>本站由 <a href="http://example.com/">@sean</a> 创建，使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a> 作为主题。</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+  <script>
+  function loadBeaudar() {
+    const els = document.querySelectorAll("#comments #beaudar");
+    if (els.length === 0) return;
+    els.forEach((el, i) => {
+      try {
+        el.innerHTML = '';
+      } catch (error) {
+        console.log(error);
+      }
+      var script = document.createElement('script');
+      script.src = 'https://beaudar.lipk.org/client.js';
+      script.async = true;
+      for (let key of Object.keys(el.attributes)) {
+        let attr = el.attributes[key];
+        if (['class', 'id'].includes(attr.name) === false) {
+          script.setAttribute(attr.name, attr.value);
+        }
+      }
+      el.appendChild(script);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', (event) => {
+      loadBeaudar();
+  });
+</script>
+
+
+
+
+<!-- inject -->
+
+
+  </div>
+</body>
+</html>
