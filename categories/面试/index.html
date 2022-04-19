@@ -66,7 +66,7 @@
 <div class="widget-wrap" id="markdown"><div class="widget-header cap dis-select"><span class="name">hello，访客</span></div><div class="widget-body fs14"><p>何も持たずに生まれ落ちた僕，永遠の隙間でのたうち回ってる。</p>
 </div></div>
 
-<div class="widget-wrap" id="recent"><div class="widget-header cap dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><div class="line"></div><a class="more-item" href="/2022/04/10/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/"><div class="cap"><time>2022-04-10</time><span>面试</span></div><span class="title">IO多路复用</span></a><div class="line"></div><a class="more-item" href="/2022/03/27/MySQL%E4%BC%98%E5%8C%96%E7%9B%B8%E5%85%B3/"><div class="cap"><time>2022-03-31</time><span>DB</span></div><span class="title">MySQL优化相关</span></a><div class="line"></div><a class="more-item" href="/2022/03/29/MySQL%E9%9D%A2%E8%AF%95%E5%A4%A7%E7%BA%B2/"><div class="cap"><time>2022-03-29</time><span>DB</span></div><span class="title">MySQL面试大纲</span></a><div class="line"></div><a class="more-item" href="/2022/03/28/JVM%E9%9D%A2%E8%AF%95%E5%A4%A7%E7%BA%B2/"><div class="cap"><time>2022-03-29</time><span>Java</span></div><span class="title">JVM面试大纲</span></a><div class="line"></div><a class="more-item" href="/2022/03/25/Spring%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><div class="cap"><time>2022-03-25</time><span>Java</span></div><span class="title">Spring源码分析</span></a></div></div>
+<div class="widget-wrap" id="recent"><div class="widget-header cap dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><div class="line"></div><a class="more-item" href="/2022/04/19/B%E7%AB%99%E5%AF%92%E9%A3%9F%E5%90%9BJVM%E7%B3%BB%E5%88%97/"><div class="cap"><time>2022-04-19</time><span>面试</span></div><span class="title">B站寒食君JVM系列</span></a><div class="line"></div><a class="more-item" href="/2022/04/10/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/"><div class="cap"><time>2022-04-10</time><span>面试</span></div><span class="title">IO多路复用</span></a><div class="line"></div><a class="more-item" href="/2022/03/27/MySQL%E4%BC%98%E5%8C%96%E7%9B%B8%E5%85%B3/"><div class="cap"><time>2022-03-31</time><span>DB</span></div><span class="title">MySQL优化相关</span></a><div class="line"></div><a class="more-item" href="/2022/03/29/MySQL%E9%9D%A2%E8%AF%95%E5%A4%A7%E7%BA%B2/"><div class="cap"><time>2022-03-29</time><span>DB</span></div><span class="title">MySQL面试大纲</span></a><div class="line"></div><a class="more-item" href="/2022/03/28/JVM%E9%9D%A2%E8%AF%95%E5%A4%A7%E7%BA%B2/"><div class="cap"><time>2022-03-29</time><span>Java</span></div><span class="title">JVM面试大纲</span></a></div></div>
 </div>
 
 
@@ -110,7 +110,10 @@
   </nav>
 </div>
 
-  <div class="post-list post"><a class="post-card post " href="/2022/04/10/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/"><article class="md">
+  <div class="post-list post"><a class="post-card post " href="/2022/04/19/B%E7%AB%99%E5%AF%92%E9%A3%9F%E5%90%9BJVM%E7%B3%BB%E5%88%97/"><article class="md">
+<h2 class="post-title">B站寒食君JVM系列</h2><div class="excerpt"><p>B站寒食君JVM系列笔记类加载过程加载加载过程是读取class文件，其中class文件是经过javac编译过后字节码文件。然后这个class文件也不仅仅只来源于本地，也可以来源于数据库，网络，或者及时生成的class文件，比如动态代理技术就是通过这个接口实现的。加载过程就是将这个字节码文件转化为某种静态数据结构储存在方法区中，并且在堆内生成一个便于用户调用的实例对象。
+加载之后，虽然JVM内...</p></div><div class="meta cap"><span class="cap" id="post-meta">发布于&nbsp;<time datetime="2022-04-19T10:40:07.000Z">2022-04-19</time></span><span class="cap breadcrumb">面试</span><div>
+</article></a><a class="post-card post " href="/2022/04/10/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/"><article class="md">
 <h2 class="post-title">IO多路复用</h2><div class="excerpt"><p>IO多路复用为何需要IO多路复用想象一下我们需要一个网络服务器来提供给多个客户端访问，来响应读写请求。如果我们使用阻塞IO，服务器处理完一个客户端请求然后接着处理另一个请求，这样是不可接受的，因为会阻塞大量客户端请求，服务是不可用的。然后我们课可以想一下，既然但线程不能处理这么多请求，那么来一个请求，我们分配一个线程来处理，那么速度是不是快了很多？可是多线程处理的方式有一个弊端就是CPU上下...</p></div><div class="meta cap"><span class="cap" id="post-meta">发布于&nbsp;<time datetime="2022-04-10T10:29:02.000Z">2022-04-10</time></span><span class="cap breadcrumb">面试</span><div>
 </article></a></div>
   
